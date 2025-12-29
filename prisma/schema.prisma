@@ -7,8 +7,32 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+
+model User{
+  id String @id @default(cuid())
+  username String @unique
+  email String @unique
+  password String
+  todos Todo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Todo {
+  id String @id @default(cuid())
+  title String
+  description String
+  completed Boolean
+  tags String[]
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
