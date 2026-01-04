@@ -1,5 +1,6 @@
 import { Exclude } from "class-transformer";
 import { IsDate, IsObject, IsString, IsUUID } from "class-validator";
+import { Todo } from "src/todo/entities/todo.entity";
 
 export class User {
   @IsString()
@@ -17,7 +18,7 @@ export class User {
   password: string;
 
   @IsObject()
-  todos: any[];
+  todos: Todo[];
 
   @IsDate()
   createdAt: Date;
