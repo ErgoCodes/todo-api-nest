@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TodoService {
-  create(createTodoDto: CreateTodoDto) {
-    return 'This action adds a new todo';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createTodoDto: CreateTodoDto) {
+    return await this.prisma.todo.create({data:{
+      title:createTodoDto.title,
+      description:createTodoDto.description,
+      completed:createTodoDto.completed ?? false,
+      tags:createTodoDto.tags,
+      userId:createTodoDto.userId,
+    }});
   }
 
-  findAll() {
-    return `This action returns all todo`;
+  async findAll() {
+    return await this.prisma.todo.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} todo`;
+  async findOne(id: string) {
+    return await this.prisma.todo.findUnique({where:{
+      id
+    }});
   }
 
-  update(id: number, updateTodoDto: UpdateTodoDto) {
-    return `This action updates a #${id} todo`;
+  async update(id: string, updateTodoDto: UpdateTodoDto) {
+    return await this.prisma.todo.update({where:{
+      id
+    },data:updateTodoDto});
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} todo`;
+  async remove(id: string) {
+    return await this.prisma.todo.delete({where:{
+      id
+    }});
   }
 }

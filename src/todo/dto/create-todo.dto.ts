@@ -9,7 +9,7 @@ export class CreateTodoDto {
 
   @IsBoolean()
   @IsOptional()
-  completed?: boolean;
+  completed?: boolean = false;
 
   @IsArray()
   @IsString({ each: true })
