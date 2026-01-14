@@ -1,41 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Todo } from 'generated/prisma/browser';
+import * as interfaces from 'src/lib/interfaces';
+import { TODO_REPOSITORY } from 'src/lib/utils';
 
 @Injectable()
 export class TodoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject(TODO_REPOSITORY) 
+    private readonly todoRepository: interfaces.IRepository<Todo, CreateTodoDto, UpdateTodoDto>,
+  ) {}
+
+
 
   async create(createTodoDto: CreateTodoDto) {
-    return await this.prisma.todo.create({data:{
-      title:createTodoDto.title,
-      description:createTodoDto.description,
-      completed:createTodoDto.completed ?? false,
-      tags:createTodoDto.tags,
-      userId:createTodoDto.userId,
-    }});
+    return await this.todoRepository.create(createTodoDto);
   }
 
   async findAll() {
-    return await this.prisma.todo.findMany();
+    return await this.todoRepository.findAll();
   }
 
   async findOne(id: string) {
-    return await this.prisma.todo.findUnique({where:{
-      id
-    }});
+    return await this.todoRepository.findById(id);
   }
 
   async update(id: string, updateTodoDto: UpdateTodoDto) {
-    return await this.prisma.todo.update({where:{
-      id
-    },data:updateTodoDto});
+    return await this.todoRepository.update(id,updateTodoDto);
   }
 
   async remove(id: string) {
-    return await this.prisma.todo.delete({where:{
-      id
-    }});
+    return await this.todoRepository.delete(id);
   }
 }

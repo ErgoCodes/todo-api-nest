@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TodoService } from './todo.service';
+import { TodoRepository } from './todo.repository';
 import { TodoController } from './todo.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { TODO_REPOSITORY } from 'src/lib/utils';
+
 
 @Module({
   controllers: [TodoController],
-  imports:[PrismaModule],
-  providers: [TodoService],
+  providers: [
+    TodoService,
+    TodoRepository,
+    { provide: TODO_REPOSITORY, useClass: TodoRepository },
+  ],
 })
 export class TodoModule {}
