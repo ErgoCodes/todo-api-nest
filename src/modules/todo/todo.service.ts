@@ -1,15 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Todo } from 'generated/prisma/browser';
-import * as interfaces from 'src/lib/interfaces';
 import { TODO_REPOSITORY } from 'src/lib/utils';
+import type { ITodoRepository } from 'src/lib/interfaces';
 
 @Injectable()
 export class TodoService {
   constructor(
     @Inject(TODO_REPOSITORY) 
-    private readonly todoRepository: interfaces.IRepository<Todo, CreateTodoDto, UpdateTodoDto>,
+    private readonly todoRepository: ITodoRepository,
   ) {}
 
 

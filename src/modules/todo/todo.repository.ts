@@ -1,13 +1,16 @@
-import { PrismaService } from 'src/prisma/prisma.service';
-import { IRepository } from 'src/lib/interfaces';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { Injectable } from '@nestjs/common';
 import { Todo } from 'generated/prisma/browser';
+import { ITodoRepository } from 'src/lib/interfaces';
 
 @Injectable()
-export class TodoRepository implements IRepository<Todo,CreateTodoDto,UpdateTodoDto> {
+export class TodoRepository implements ITodoRepository {
   constructor(private readonly prisma: PrismaService) {}
+  findByUserId(userId: string): Promise<Todo[]> {
+    return this.prisma.todo.findMany({ where: { userId } });
+  }
   create(item: CreateTodoDto) {
     const { completed, tags, ...rest } = item;
     return this.prisma.todo.create({
