@@ -10,3 +10,17 @@ Content-Type: application/json
 
 GET http://localhost:3001/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc3MDU1OTEwNywiZXhwIjoxNzcwNTU5MjI3fQ.Fmx_wUarl1lwJmwr8pUpOvQ3MwTsVYtAWcdRZ5jYtog
+
+###
+POST http://localhost:3001/auth-v2/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+###
+
+GET http://localhost:3001/auth-v2/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzcwNTYzMzY2LCJleHAiOjE3NzA1NjM0ODZ9.6NXnlSAvCKj9WA9y5LuXBtrr0JwSODJsbhkGIAAZrxo

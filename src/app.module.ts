@@ -7,6 +7,9 @@ import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AuthController } from './modules/auth/auth.controller';
+import { PassportAuthController } from './modules/auth/passport-auth.controller';
+import { AuthService } from './modules/auth/auth.service';
 
 @Module({
   imports: [
@@ -16,7 +19,7 @@ import { AuthModule } from './modules/auth/auth.module';
     TodoModule,
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, PrismaService],
+  controllers: [AppController, AuthController,PassportAuthController],
+  providers: [AppService, PrismaService,AuthService],
 })
 export class AppModule {}
