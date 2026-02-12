@@ -16,6 +16,5 @@ export class CreateTodoDto {
   @IsOptional()
   tags?: string[];
 
-  @IsString()
-  userId: string;
+
 }

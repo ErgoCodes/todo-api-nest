@@ -1,14 +1,18 @@
 import { AuthDto } from './dto/create-auth.dto';
 import { UserService } from '../user/user.service';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResult, SignInData } from './types';
+import { RegisterDto } from './entities/register.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService,private readonly jwt:JwtService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwt: JwtService,
+  ) {}
   async validate(authDto: AuthDto) {
-    const user ={id: '1', username: 'admin', password: '123456'} //await this.userService.findByUsername(authDto.username);
+    const user = await this.userService.findByUsername(authDto.username);
     // Simulate validation logic
     if (
       authDto.username === user?.username &&
@@ -24,14 +28,31 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     // Simulate token generation
-    return this.singIn({id:user.userId,username:user.username});
+    return this.singIn({ id: user.userId, username: user.username });
   }
-  async singIn (user:SignInData):Promise<AuthResult>{
-    const tokenPayload={
-      sub:user.id,
-      username:user.username
+  async singIn(user: SignInData): Promise<AuthResult> {
+    const tokenPayload = {
+      sub: user.id,
+      username: user.username,
+    };
+    const accessToken = await this.jwt.signAsync(tokenPayload);
+    return { accessToken, userId: user.id, username: user.username };
+  }
+  async register(registerDto: RegisterDto) {
+    // Check if user already exists
+    const existingUser = await this.userService.findByUsername(
+      registerDto.username,
+    );
+    if (existingUser) {
+      throw new ConflictException('Username already exists');
     }
-    const accessToken = await this.jwt.signAsync(tokenPayload)
-    return {accessToken,userId:user.id,username:user.username}
+
+    // Create new user
+    const newUser = await this.userService.create(registerDto);
+
+    // Generate JWT token for the new user
+    return this.singIn({ id: newUser.id, username: newUser.username });
   }
 }
+
+

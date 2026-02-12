@@ -8,7 +8,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { User } from 'src/modules/user/entities/user.entity';
 
 export class Todo {
   @IsUUID()
@@ -30,13 +29,6 @@ export class Todo {
   @IsArray()
   @IsString({ each: true })
   tags: string[];
-
-  @IsUUID()
-  @IsString()
-  userId: string;
-
-  @Exclude()
-  user: User;
 
   @IsDate()
   createdAt: Date;

@@ -1,7 +1,12 @@
-export interface IRepository<T, CreateDto = any, UpdateDto = any> {
-  create(item: CreateDto): Promise<T>;
-  update(id: string, item: UpdateDto): Promise<T>;
-  delete(id: string): Promise<T>;
-  findAll(): Promise<T[]>;
-  findById(id: string): Promise<T | null>;
+export interface IRepository<
+  T,
+  CreateDto = Partial<T>,
+  UpdateDto = Partial<T>,
+  Args extends any[] = [],
+> {
+  create(item: CreateDto, ...args: Args): Promise<T>;
+  update(id: string, item: UpdateDto, ...args: Args): Promise<T>;
+  delete(id: string, ...args: Args): Promise<T>;
+  findAll(...args: Args): Promise<T[]>;
+  findById(id: string, ...args: Args): Promise<T | null>;
 }

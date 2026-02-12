@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotImplementedExcept
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/create-auth.dto';
 import { AuthGuard } from './guards/auth-guard';
-import { request } from 'http';
+import { RegisterDto } from './entities/register.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -14,10 +14,17 @@ export class AuthController {
     return this.authService.authenticate(authDto);
   }
 
+  @Post('register')
+  register(@Body() registerDto: RegisterDto) {
+    console.log('Received register request with data:', registerDto);
+    return this.authService.register(registerDto);
+  }
+
   @UseGuards(AuthGuard)
   @Get('me')
   getProfile(@Request() request) {   
     return request.user;
   }
+
 }
   

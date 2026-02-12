@@ -11,26 +11,29 @@ export class TodoRepository implements ITodoRepository {
   findByUserId(userId: string): Promise<Todo[]> {
     return this.prisma.todo.findMany({ where: { userId } });
   }
-  create(item: CreateTodoDto) {
+  create(item: CreateTodoDto, userId: string) {
     const { completed, tags, ...rest } = item;
     return this.prisma.todo.create({
       data: {
         ...rest,
         completed: completed ?? false,
         tags: tags ?? [],
+        user: {
+          connect: { id: userId },
+        },
       },
     });
   }
-  update(id: string, item: UpdateTodoDto) {
-    return this.prisma.todo.update({ where: { id }, data: item });
+  update(id: string, item: UpdateTodoDto, userId: string) {
+    return this.prisma.todo.update({ where: { id, userId }, data: item });
   }
-  delete(id: string) {
-    return this.prisma.todo.delete({ where: { id } });
+  delete(id: string, userId: string) {
+    return this.prisma.todo.delete({ where: { id, userId } });
   }
   findAll() {
     return this.prisma.todo.findMany();
   }
-  findById(id: string) {
-    return this.prisma.todo.findUnique({ where: { id } });
+  findById(id: string, userId: string) {
+    return this.prisma.todo.findUnique({ where: { id, userId } });
   }
 }
