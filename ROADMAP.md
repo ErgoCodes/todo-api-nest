@@ -21,7 +21,7 @@ Este documento describe el plan de acción para llevar el repositorio `todo-api-
 - [x] **Filtros de Excepción Globales**:
   - Crear un `AllExceptionsFilter` para estandarizar las respuestas de error (JSON estructurado).
   - Mapear errores de Prisma (P2002, P2025) a códigos HTTP correctos (409 Conflict, 404 Not Found).
-- [ ] **Manejo de 404**:
+- [x] **Manejo de 404**:
   - Asegurar que `findById` y métodos similares lancen excepciones `NotFoundException` en lugar de devolver `null` o `200 OK` vacío.
 - [ ] **Logging**:
   - Implementar un logger estructurado (ej. `winston` o `pino`) en lugar de `console.log`.

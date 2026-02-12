@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { TODO_REPOSITORY } from 'src/lib/utils';
@@ -20,7 +20,11 @@ export class TodoService {
   }
 
   async findOne(id: string, userId: string) {
-    return await this.todoRepository.findById(id, userId);
+    const todo = await this.todoRepository.findById(id, userId);
+    if (!todo) {
+      throw new NotFoundException(`Todo with ID "${id}" not found`);
+    }
+    return todo;
   }
 
   async update(id: string, updateTodoDto: UpdateTodoDto, userId: string) {
