@@ -8,32 +8,62 @@ import { ITodoRepository } from 'src/lib/interfaces';
 @Injectable()
 export class TodoRepository implements ITodoRepository {
   constructor(private readonly prisma: PrismaService) {}
-  findByUserId(userId: string): Promise<Todo[]> {
-    return this.prisma.todo.findMany({ where: { userId } });
+  async findByUserId(userId: string): Promise<Todo[]> {
+    try {
+      const response = await this.prisma.todo.findMany({ where: { userId } });
+      return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to find todo by user id');
+    }
   }
-  create(item: CreateTodoDto, userId: string) {
+  async create(item: CreateTodoDto, userId: string): Promise<Todo> {
     const { completed, tags, ...rest } = item;
-    return this.prisma.todo.create({
-      data: {
-        ...rest,
-        completed: completed ?? false,
-        tags: tags ?? [],
+    try {
+      const response = await this.prisma.todo.create({
+        data: {
+          ...rest,
+          completed: completed ?? false,
+          tags: tags ?? [],
         user: {
           connect: { id: userId },
         },
       },
     });
+    return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to create todo');
+    }
   }
-  update(id: string, item: UpdateTodoDto, userId: string) {
-    return this.prisma.todo.update({ where: { id, userId }, data: item });
+  async update(id: string, item: UpdateTodoDto, userId: string): Promise<Todo> {
+    try {
+      const response = await this.prisma.todo.update({ where: { id, userId }, data: item });
+      return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to update todo');
+    }
   }
-  delete(id: string, userId: string) {
-    return this.prisma.todo.delete({ where: { id, userId } });
+  async delete(id: string, userId: string): Promise<Todo> {
+    try {
+      const response = await this.prisma.todo.delete({ where: { id, userId } });
+      return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to delete todo');
+    }
   }
-  findAll() {
-    return this.prisma.todo.findMany();
+  async findAll(): Promise<Todo[]> {
+    try {
+      const response = await this.prisma.todo.findMany();
+      return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to find all todos');
+    }
   }
-  findById(id: string, userId: string) {
-    return this.prisma.todo.findUnique({ where: { id, userId } });
+  async findById(id: string, userId: string): Promise<Todo | null> {
+    try {
+      const response = await this.prisma.todo.findUnique({ where: { id, userId } });
+      return response;
+    } catch (error) {
+      throw new Error('Database error: Unable to find todo by id');
+    }
   }
 }
