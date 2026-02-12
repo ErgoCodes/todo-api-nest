@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -14,12 +16,26 @@ import { AuthService } from './modules/auth/auth.service';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 3,
+      },
+    ]),
     UserModule,
     PrismaModule,
     TodoModule,
     AuthModule,
   ],
   controllers: [AppController, AuthController, PassportAuthController],
-  providers: [AppService, PrismaService, AuthService],
+  providers: [
+    AppService,
+    PrismaService,
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

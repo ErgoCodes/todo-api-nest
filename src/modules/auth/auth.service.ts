@@ -1,9 +1,14 @@
 import { AuthDto } from './dto/create-auth.dto';
 import { UserService } from '../user/user.service';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthResult, SignInData } from './types';
+import { AuthResult, SingInData } from './types';
 import { RegisterDto } from './entities/register.entity';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -13,11 +18,13 @@ export class AuthService {
   ) {}
   async validate(authDto: AuthDto) {
     const user = await this.userService.findByUsername(authDto.username);
-    // Simulate validation logic
-    if (
-      authDto.username === user?.username &&
-      authDto.password === user?.password
-    ) {
+    if (!user) return null;
+
+    const passwordMatches = await argon2.verify(
+      user.password,
+      authDto.password,
+    );
+    if (passwordMatches) {
       return { username: authDto.username, userId: user.id };
     }
     return null;
@@ -27,10 +34,9 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    // Simulate token generation
     return this.singIn({ id: user.userId, username: user.username });
   }
-  async singIn(user: SignInData): Promise<AuthResult> {
+  async singIn(user: SingInData): Promise<AuthResult> {
     const tokenPayload = {
       sub: user.id,
       username: user.username,
@@ -54,5 +60,3 @@ export class AuthService {
     return this.singIn({ id: newUser.id, username: newUser.username });
   }
 }
-
-

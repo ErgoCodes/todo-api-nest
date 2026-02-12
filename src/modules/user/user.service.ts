@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { USER_REPOSITORY } from 'src/lib/utils';
 import type { IUserRepository } from 'src/lib/interfaces';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,11 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    return await this.userRepository.create(createUserDto);
+    const hashedPassword = await argon2.hash(createUserDto.password);
+    return await this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
   }
 
   async findAll() {
@@ -24,6 +29,9 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      updateUserDto.password = await argon2.hash(updateUserDto.password);
+    }
     return await this.userRepository.update(id, updateUserDto);
   }
 

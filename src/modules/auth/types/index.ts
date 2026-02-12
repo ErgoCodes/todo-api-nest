@@ -1,4 +1,4 @@
-export type SignInData={
+export type SingInData={
     id:string,
     username:string
 }

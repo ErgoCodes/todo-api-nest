@@ -9,59 +9,34 @@ import { Injectable } from '@nestjs/common';
 export class UserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) {}
   async findByEmail(email: string): Promise<User | null> {
-    try {
-      const response = await this.prisma.user.findUnique({ where: { email } });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to find user by email');
-    }
+    const response = await this.prisma.user.findUnique({ where: { email } });
+    return response;
   }
   async findByUsername(username: string): Promise<User | null> {
-    try {
-      const response = await this.prisma.user.findUnique({ where: { username } });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to find user by username');
-    }
+    const response = await this.prisma.user.findUnique({ where: { username } });
+    return response;
   }
   async create(item: CreateUserDto): Promise<User> {
-    try {
-      const response = await this.prisma.user.create({ data: item });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to create user');
-    }
+    const response = await this.prisma.user.create({ data: item });
+    return response;
   }
   async update(id: string, item: UpdateUserDto): Promise<User> {
-    try {
-      const response = await this.prisma.user.update({ where: { id }, data: item });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to update user');
-    }
+    const response = await this.prisma.user.update({
+      where: { id },
+      data: item,
+    });
+    return response;
   }
   async delete(id: string): Promise<User> {
-    try {
-      const response = await this.prisma.user.delete({ where: { id } });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to delete user');
-    }
+    const response = await this.prisma.user.delete({ where: { id } });
+    return response;
   }
   async findAll(): Promise<User[]> {
-    try {
-      const response = await this.prisma.user.findMany();
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to find all users');
-    }
+    const response = await this.prisma.user.findMany();
+    return response;
   }
   async findById(id: string): Promise<User | null> {
-    try {
-      const response = await this.prisma.user.findUnique({ where: { id } });
-      return response;
-    } catch (error) {
-      throw new Error('Database error: Unable to find user by id');
-    }
+    const response = await this.prisma.user.findUnique({ where: { id } });
+    return response;
   }
 }

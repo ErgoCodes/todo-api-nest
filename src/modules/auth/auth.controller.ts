@@ -10,13 +10,11 @@ export class AuthController {
 
   @Post('login')
   login(@Body() authDto: AuthDto) {
-    console.log('Received login request with data:', authDto);
     return this.authService.authenticate(authDto);
   }
 
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
-    console.log('Received register request with data:', registerDto);
     return this.authService.register(registerDto);
   }
 
