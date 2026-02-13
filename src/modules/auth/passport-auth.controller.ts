@@ -4,10 +4,11 @@ import {
   Post,
   Body,
   UseGuards,
-  Request,
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
+import { User } from '../../lib/decorators/user.decorator';
+import type { RequestUser } from '../../lib/interfaces/request-user.interface';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/create-auth.dto';
 import { PassportAuthGuard } from './guards/passport-guard';
@@ -20,14 +21,13 @@ export class PassportAuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(PassportAuthGuard)
-  login(@Request() request) {
-    console.log(request);
-    return this.authService.singIn(request.user);
+  login(@User() user: RequestUser) {
+    return this.authService.signIn(user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() request) {
-    return request.user;
+  getProfile(@User() user: RequestUser) {
+    return user;
   }
 }

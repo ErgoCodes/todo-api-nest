@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthResult, SingInData } from './types';
+import { AuthResult, SignInData } from './types';
 import { RegisterDto } from './entities/register.entity';
 import * as argon2 from 'argon2';
 
@@ -34,15 +34,15 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.singIn({ id: user.userId, username: user.username });
+    return this.signIn({ userId: user.userId, username: user.username });
   }
-  async singIn(user: SingInData): Promise<AuthResult> {
+  async signIn(user: SignInData): Promise<AuthResult> {
     const tokenPayload = {
-      sub: user.id,
+      sub: user.userId,
       username: user.username,
     };
     const accessToken = await this.jwt.signAsync(tokenPayload);
-    return { accessToken, userId: user.id, username: user.username };
+    return { accessToken, userId: user.userId, username: user.username };
   }
   async register(registerDto: RegisterDto) {
     // Check if user already exists
@@ -57,6 +57,6 @@ export class AuthService {
     const newUser = await this.userService.create(registerDto);
 
     // Generate JWT token for the new user
-    return this.singIn({ id: newUser.id, username: newUser.username });
+    return this.signIn({ userId: newUser.id, username: newUser.username });
   }
 }

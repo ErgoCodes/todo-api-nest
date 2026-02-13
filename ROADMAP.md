@@ -28,7 +28,7 @@ Este documento describe el plan de acción para llevar el repositorio `todo-api-
 
 ## 3. Documentación
 
-- [ ] **OpenAPI / Swagger**:
+- [x] **OpenAPI / Swagger**:
   - Integrar `@nestjs/swagger`.
   - Decorar los DTOs y Controladores con `@ApiProperty`, `@ApiOperation`, `@ApiResponse`.
   - Habilitar la ruta `/api/docs`.
@@ -54,9 +54,9 @@ Este documento describe el plan de acción para llevar el repositorio `todo-api-
 
 ## 6. Calidad de Código y Refactorización
 
-- [ ] **Tipado Estricto**:
+- [x] **Tipado Estricto**:
   - Eliminar el uso de `any` (especialmente en `@Req() req: any`).
   - Crear decorador `@User()` para extraer el usuario del request de forma segura.
-- [ ] **Limpieza**:
+- [x] **Limpieza**:
   - Corregir typos (ej. `singIn` -> `signIn`).
   - Remover código muerto o comentado.

@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './lib/filters/all-exceptions.filter';
 import { PrismaClientExceptionFilter } from './lib/filters/prisma-exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,9 +36,22 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      // forbidNonWhitelisted: true, // Recommended for strict validation
+      forbidNonWhitelisted: true,
     }),
   );
+  /*
+   * DOCUMENTATION: Swagger/OpenAPI
+   * Setup Swagger to generate API documentation automatically.
+   */
+  const config = new DocumentBuilder()
+    .setTitle('Todo API')
+    .setDescription('The Todo API description')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
