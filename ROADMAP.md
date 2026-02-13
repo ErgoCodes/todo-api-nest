@@ -43,10 +43,10 @@ Este documento describe el plan de acción para llevar el repositorio `todo-api-
 
 ## 5. DevOps y Configuración
 
-- [ ] **Docker**:
+- [x] **Docker**:
   - Crear `Dockerfile` optimizado para producción (multi-stage build).
   - Crear `docker-compose.yml` para levantar la API y la Base de Datos localmente.
-- [ ] **Variables de Entorno**:
+- [x] **Variables de Entorno**:
   - Validar variables de entorno al inicio usando `joi` o `class-validator` (asegurar que DB_URL, JWT_SECRET, etc., existan).
   - Crear `.env.example`.
 - [ ] **CI/CD (Futuro)**:

@@ -13,9 +13,14 @@ import { AuthController } from './modules/auth/auth.controller';
 import { PassportAuthController } from './modules/auth/passport-auth.controller';
 import { AuthService } from './modules/auth/auth.service';
 
+import { envValidationSchema } from './lib/config/env.validation';
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
