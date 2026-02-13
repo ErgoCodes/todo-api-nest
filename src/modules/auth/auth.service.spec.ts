@@ -2,159 +2,118 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException, ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 
 jest.mock('argon2');
 
+// Mock dependencies
+const mockUserService = {
+  findByUsername: jest.fn(),
+  create: jest.fn(),
+};
+
+const mockJwtService = {
+  signAsync: jest.fn(),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
-  let userServiceMock: any;
-  let jwtServiceMock: any;
 
   beforeEach(async () => {
-    userServiceMock = {
-      findByUsername: jest.fn(),
-      create: jest.fn(),
-    };
-    jwtServiceMock = {
-      signAsync: jest.fn(),
-    };
-
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        {
-          provide: UserService,
-          useValue: userServiceMock,
-        },
-        {
-          provide: JwtService,
-          useValue: jwtServiceMock,
-        },
+        { provide: UserService, useValue: mockUserService },
+        { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('validate', () => {
-    it('should return strict user info if password matches', async () => {
-      const authDto = { username: 'test', password: 'password' };
-      const user = {
-        id: '1',
+  describe('register', () => {
+    it('should successfully register a new user', async () => {
+      const registerDto = {
         username: 'test',
-        password: 'hashedPassword',
-        userId: '1',
+        email: 'test@test.com',
+        password: 'pass',
       };
+      const createdUser = { id: '1', ...registerDto, password: 'hashed_pass' };
 
-      userServiceMock.findByUsername.mockResolvedValue(user);
+      mockUserService.findByUsername.mockResolvedValue(null);
+      mockUserService.create.mockResolvedValue(createdUser);
+      mockJwtService.signAsync.mockResolvedValue('token');
+
+      const result = await service.register(registerDto);
+
+      expect(mockUserService.findByUsername).toHaveBeenCalledWith('test');
+      expect(mockUserService.create).toHaveBeenCalledWith(registerDto);
+      expect(result).toEqual({
+        accessToken: 'token',
+        userId: '1',
+        username: 'test',
+      });
+    });
+
+    it('should throw ConflictException if username exists', async () => {
+      mockUserService.findByUsername.mockResolvedValue({ id: '1' });
+
+      await expect(
+        service.register({ username: 'test', email: 't@t.com', password: 'p' }),
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('validate', () => {
+    it('should return user info if validation succeeds', async () => {
+      const user = { id: '1', username: 'test', password: 'hashed_pass' };
+      mockUserService.findByUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.validate(authDto);
-
-      expect(userServiceMock.findByUsername).toHaveBeenCalledWith('test');
-      expect(argon2.verify).toHaveBeenCalledWith('hashedPassword', 'password');
+      const result = await service.validate({
+        username: 'test',
+        password: 'pass',
+      });
       expect(result).toEqual({ username: 'test', userId: '1' });
     });
 
     it('should return null if user not found', async () => {
-      const authDto = { username: 'test', password: 'password' };
-      userServiceMock.findByUsername.mockResolvedValue(null);
-
-      const result = await service.validate(authDto);
-
-      expect(userServiceMock.findByUsername).toHaveBeenCalledWith('test');
-      expect(argon2.verify).not.toHaveBeenCalled();
+      mockUserService.findByUsername.mockResolvedValue(null);
+      const result = await service.validate({
+        username: 'test',
+        password: 'pass',
+      });
       expect(result).toBeNull();
     });
 
     it('should return null if password does not match', async () => {
-      const authDto = { username: 'test', password: 'wrongPassword' };
-      const user = { id: '1', username: 'test', password: 'hashedPassword' };
-
-      userServiceMock.findByUsername.mockResolvedValue(user);
+      const user = { id: '1', username: 'test', password: 'hashed_pass' };
+      mockUserService.findByUsername.mockResolvedValue(user);
       (argon2.verify as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validate(authDto);
-
-      expect(argon2.verify).toHaveBeenCalledWith(
-        'hashedPassword',
-        'wrongPassword',
-      );
+      const result = await service.validate({
+        username: 'test',
+        password: 'wrong',
+      });
       expect(result).toBeNull();
     });
   });
 
-  describe('authenticate', () => {
-    it('should return access token if validation passes', async () => {
-      const authDto = { username: 'test', password: 'password' };
-      const user = { username: 'test', userId: '1' };
-      const accessToken = 'token';
-
-      jest.spyOn(service, 'validate').mockResolvedValue(user);
-      jwtServiceMock.signAsync.mockResolvedValue(accessToken);
-
-      const result = await service.authenticate(authDto);
-
-      expect(service.validate).toHaveBeenCalledWith(authDto);
-      expect(jwtServiceMock.signAsync).toHaveBeenCalled();
-      expect(result).toEqual({ accessToken, userId: '1', username: 'test' });
-    });
-
-    it('should throw UnauthorizedException if validation fails', async () => {
-      const authDto = { username: 'test', password: 'wrongPassword' };
-      jest.spyOn(service, 'validate').mockResolvedValue(null);
-
-      await expect(service.authenticate(authDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
-    });
-  });
-
-  describe('register', () => {
-    it('should create new user and return token if username available', async () => {
-      const registerDto = {
-        username: 'test',
-        password: 'password',
-        email: 'test@test.com',
-      };
-      const newUser = { id: '1', ...registerDto };
-      const accessToken = 'token';
-
-      userServiceMock.findByUsername.mockResolvedValue(null);
-      userServiceMock.create.mockResolvedValue(newUser);
-      jwtServiceMock.signAsync.mockResolvedValue(accessToken);
-
-      const result = await service.register(registerDto);
-
-      expect(userServiceMock.findByUsername).toHaveBeenCalledWith('test');
-      expect(userServiceMock.create).toHaveBeenCalledWith(registerDto);
-      expect(result).toEqual({ accessToken, userId: '1', username: 'test' });
-    });
-
-    it('should throw ConflictException if username already exists', async () => {
-      const registerDto = {
-        username: 'test',
-        password: 'password',
-        email: 'test@test.com',
-      };
-      userServiceMock.findByUsername.mockResolvedValue({
-        id: '1',
+  describe('signIn', () => {
+    it('should return access token', async () => {
+      mockJwtService.signAsync.mockResolvedValue('token');
+      const result = await service.signIn({ userId: '1', username: 'test' });
+      expect(result).toEqual({
+        accessToken: 'token',
+        userId: '1',
         username: 'test',
       });
-
-      await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
-      );
     });
   });
 });

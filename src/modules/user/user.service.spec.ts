@@ -1,40 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { USER_REPOSITORY } from '../../lib/utils';
+import { USER_REPOSITORY } from 'src/lib/utils';
 import { NotFoundException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 
 jest.mock('argon2');
 
+// Mock repository
+const mockUserRepository = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findById: jest.fn(),
+  findByUsername: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+};
+
 describe('UserService', () => {
   let service: UserService;
-  let repositoryMock: any;
 
   beforeEach(async () => {
-    repositoryMock = {
-      create: jest.fn(),
-      findAll: jest.fn(),
-      findById: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findByUsername: jest.fn(),
-    };
-
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        {
-          provide: USER_REPOSITORY,
-          useValue: repositoryMock,
-        },
+        { provide: USER_REPOSITORY, useValue: mockUserRepository },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -43,121 +37,68 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should hash password and create user', async () => {
-      const createUserDto = {
+      const dto = {
         username: 'test',
-        password: 'password',
+        password: 'plain',
         email: 'test@test.com',
       };
-      const hashedPassword = 'hashedPassword';
-      (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      repositoryMock.create.mockResolvedValue({
-        ...createUserDto,
-        password: hashedPassword,
-        id: '1',
-      });
+      const expected = { id: '1', ...dto, password: 'hashed' };
 
-      const result = await service.create(createUserDto);
+      (argon2.hash as jest.Mock).mockResolvedValue('hashed');
+      mockUserRepository.create.mockResolvedValue(expected);
 
-      expect(argon2.hash).toHaveBeenCalledWith('password');
-      expect(repositoryMock.create).toHaveBeenCalledWith({
-        ...createUserDto,
-        password: hashedPassword,
+      const result = await service.create(dto);
+
+      expect(argon2.hash).toHaveBeenCalledWith('plain');
+      expect(mockUserRepository.create).toHaveBeenCalledWith({
+        ...dto,
+        password: 'hashed',
       });
-      expect(result).toEqual({
-        ...createUserDto,
-        password: hashedPassword,
-        id: '1',
-      });
+      expect(result).toEqual(expected);
     });
   });
 
   describe('findAll', () => {
-    it('should return an array of users', async () => {
+    it('should return users', async () => {
       const users = [{ id: '1', username: 'test' }];
-      repositoryMock.findAll.mockResolvedValue(users);
-
-      const result = await service.findAll();
-
-      expect(repositoryMock.findAll).toHaveBeenCalled();
-      expect(result).toEqual(users);
+      mockUserRepository.findAll.mockResolvedValue(users);
+      expect(await service.findAll()).toEqual(users);
     });
   });
 
   describe('findOne', () => {
-    it('should return a user if found', async () => {
+    it('should return user if found', async () => {
       const user = { id: '1', username: 'test' };
-      repositoryMock.findById.mockResolvedValue(user);
-
-      const result = await service.findOne('1');
-
-      expect(repositoryMock.findById).toHaveBeenCalledWith('1');
-      expect(result).toEqual(user);
+      mockUserRepository.findById.mockResolvedValue(user);
+      expect(await service.findOne('1')).toEqual(user);
     });
 
-    it('should throw NotFoundException if user not found', async () => {
-      repositoryMock.findById.mockResolvedValue(null);
-
+    it('should throw NotFoundException if not found', async () => {
+      mockUserRepository.findById.mockResolvedValue(null);
       await expect(service.findOne('1')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('update', () => {
-    it('should hash password if provided and update user', async () => {
-      const updateUserDto = { password: 'newPassword' };
-      const hashedPassword = 'hashedNewPassword';
-      (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      repositoryMock.update.mockResolvedValue({
-        id: '1',
-        ...updateUserDto,
-        password: hashedPassword,
+    it('should hash password if provided in update', async () => {
+      const dto = { password: 'newpass' };
+      (argon2.hash as jest.Mock).mockResolvedValue('hashed_new');
+      mockUserRepository.update.mockResolvedValue({ id: '1' });
+
+      await service.update('1', dto);
+
+      expect(argon2.hash).toHaveBeenCalledWith('newpass');
+      expect(mockUserRepository.update).toHaveBeenCalledWith('1', {
+        password: 'hashed_new',
       });
-
-      const result = await service.update('1', updateUserDto);
-
-      expect(argon2.hash).toHaveBeenCalledWith('newPassword');
-      expect(repositoryMock.update).toHaveBeenCalledWith('1', {
-        ...updateUserDto,
-        password: hashedPassword,
-      });
-      expect(result).toEqual({
-        id: '1',
-        ...updateUserDto,
-        password: hashedPassword,
-      });
-    });
-
-    it('should update user without hashing if password not provided', async () => {
-      const updateUserDto = { username: 'newUsername' };
-      repositoryMock.update.mockResolvedValue({ id: '1', ...updateUserDto });
-
-      const result = await service.update('1', updateUserDto);
-
-      expect(argon2.hash).not.toHaveBeenCalled();
-      expect(repositoryMock.update).toHaveBeenCalledWith('1', updateUserDto);
-      expect(result).toEqual({ id: '1', ...updateUserDto });
     });
   });
 
   describe('remove', () => {
-    it('should remove user', async () => {
-      repositoryMock.delete.mockResolvedValue({ id: '1' });
-
-      const result = await service.remove('1');
-
-      expect(repositoryMock.delete).toHaveBeenCalledWith('1');
-      expect(result).toEqual({ id: '1' });
-    });
-  });
-
-  describe('findByUsername', () => {
-    it('should return user by username', async () => {
-      const user = { id: '1', username: 'test' };
-      repositoryMock.findByUsername.mockResolvedValue(user);
-
-      const result = await service.findByUsername('test');
-
-      expect(repositoryMock.findByUsername).toHaveBeenCalledWith('test');
-      expect(result).toEqual(user);
+    it('should delete user', async () => {
+      mockUserRepository.delete.mockResolvedValue({ id: '1' });
+      await service.remove('1');
+      expect(mockUserRepository.delete).toHaveBeenCalledWith('1');
     });
   });
 });

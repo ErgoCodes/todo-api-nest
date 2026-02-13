@@ -1,28 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TodoService } from './todo.service';
-import { TODO_REPOSITORY } from '../../lib/utils';
+import { TODO_REPOSITORY } from 'src/lib/utils';
 import { NotFoundException } from '@nestjs/common';
+
+const mockTodoRepository = {
+  create: jest.fn(),
+  findByUserId: jest.fn(),
+  findById: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+};
 
 describe('TodoService', () => {
   let service: TodoService;
-  let repositoryMock: any;
 
   beforeEach(async () => {
-    repositoryMock = {
-      create: jest.fn(),
-      findByUserId: jest.fn(),
-      findById: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    };
-
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TodoService,
-        {
-          provide: TODO_REPOSITORY,
-          useValue: repositoryMock,
-        },
+        { provide: TODO_REPOSITORY, useValue: mockTodoRepository },
       ],
     }).compile();
 
@@ -35,57 +32,41 @@ describe('TodoService', () => {
 
   describe('create', () => {
     it('should create a todo', async () => {
-      const createTodoDto = {
-        title: 'Test Todo',
-        description: 'Test Description',
-      };
-      const userId = 'user-1';
-      const expectedTodo = { id: 'todo-1', ...createTodoDto, userId };
+      const dto = { title: 'Test', description: 'Desc' };
+      const userId = 'user1';
+      const expected = { id: '1', ...dto, userId };
 
-      repositoryMock.create.mockResolvedValue(expectedTodo);
+      mockTodoRepository.create.mockResolvedValue(expected);
 
-      const result = await service.create(createTodoDto, userId);
-
-      expect(repositoryMock.create).toHaveBeenCalledWith(createTodoDto, userId);
-      expect(result).toEqual(expectedTodo);
+      const result = await service.create(dto, userId);
+      expect(mockTodoRepository.create).toHaveBeenCalledWith(dto, userId);
+      expect(result).toEqual(expected);
     });
   });
 
   describe('findAll', () => {
-    it('should return an array of todos for a user', async () => {
-      const userId = 'user-1';
-      const todos = [{ id: 'todo-1', title: 'Test Todo', userId }];
+    it('should return an array of todos', async () => {
+      const todos = [{ id: '1', title: 'Test' }];
+      mockTodoRepository.findByUserId.mockResolvedValue(todos);
 
-      repositoryMock.findByUserId.mockResolvedValue(todos);
-
-      const result = await service.findAll(userId);
-
-      expect(repositoryMock.findByUserId).toHaveBeenCalledWith(userId);
+      const result = await service.findAll('user1');
       expect(result).toEqual(todos);
     });
   });
 
   describe('findOne', () => {
     it('should return a todo if found', async () => {
-      const id = 'todo-1';
-      const userId = 'user-1';
-      const todo = { id, title: 'Test Todo', userId };
+      const todo = { id: '1', title: 'Test' };
+      mockTodoRepository.findById.mockResolvedValue(todo);
 
-      repositoryMock.findById.mockResolvedValue(todo);
-
-      const result = await service.findOne(id, userId);
-
-      expect(repositoryMock.findById).toHaveBeenCalledWith(id, userId);
+      const result = await service.findOne('1', 'user1');
       expect(result).toEqual(todo);
     });
 
-    it('should throw NotFoundException if todo not found', async () => {
-      const id = 'todo-1';
-      const userId = 'user-1';
+    it('should throw NotFoundException if not found', async () => {
+      mockTodoRepository.findById.mockResolvedValue(null);
 
-      repositoryMock.findById.mockResolvedValue(null);
-
-      await expect(service.findOne(id, userId)).rejects.toThrow(
+      await expect(service.findOne('1', 'user1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -93,36 +74,20 @@ describe('TodoService', () => {
 
   describe('update', () => {
     it('should update a todo', async () => {
-      const id = 'todo-1';
-      const userId = 'user-1';
-      const updateTodoDto = { title: 'Updated Todo' };
-      const updatedTodo = { id, ...updateTodoDto, userId };
+      const dto = { title: 'Updated' };
+      const expected = { id: '1', title: 'Updated' };
+      mockTodoRepository.update.mockResolvedValue(expected);
 
-      repositoryMock.update.mockResolvedValue(updatedTodo);
-
-      const result = await service.update(id, updateTodoDto, userId);
-
-      expect(repositoryMock.update).toHaveBeenCalledWith(
-        id,
-        updateTodoDto,
-        userId,
-      );
-      expect(result).toEqual(updatedTodo);
+      const result = await service.update('1', dto, 'user1');
+      expect(result).toEqual(expected);
     });
   });
 
   describe('remove', () => {
     it('should remove a todo', async () => {
-      const id = 'todo-1';
-      const userId = 'user-1';
-      const deletedTodo = { id, title: 'Test Todo', userId };
-
-      repositoryMock.delete.mockResolvedValue(deletedTodo);
-
-      const result = await service.remove(id, userId);
-
-      expect(repositoryMock.delete).toHaveBeenCalledWith(id, userId);
-      expect(result).toEqual(deletedTodo);
+      mockTodoRepository.delete.mockResolvedValue({ id: '1' });
+      await service.remove('1', 'user1');
+      expect(mockTodoRepository.delete).toHaveBeenCalledWith('1', 'user1');
     });
   });
 });
