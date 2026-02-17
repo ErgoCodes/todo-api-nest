@@ -1,62 +1,62 @@
 # Production Ready Roadmap for Todo API
 
-Este documento describe el plan de acción para llevar el repositorio `todo-api-nest` a un estado de **MVP listo para producción**.
+This document describes the action plan to bring the `todo-api-nest` repository to an **MVP state ready for production**.
 
-## 1. Seguridad (Prioridad: CRÍTICA)
+## 1. Security (Priority: CRITICAL)
 
-- [x] **Hashing de Contraseñas**:
-  - Reemplazar el almacenamiento de contraseñas en texto plano.
-  - Implementar `bcrypt` o `argon2` en `AuthService` y `UserService`.
-- [x] **Protección HTTP**:
-  - Instalar y configurar `helmet` para establecer cabeceras de seguridad HTTP seguras.
+- [x] **Password Hashing**:
+  - Replace plain text password storage.
+  - Implement `bcrypt` or `argon2` in `AuthService` and `UserService`.
+- [x] **HTTP Protection**:
+  - Install and configure `helmet` to set secure HTTP security headers.
 - [x] **CORS (Cross-Origin Resource Sharing)**:
-  - Habilitar y configurar CORS estrictamente en `main.ts` para permitir solo orígenes confiables.
+  - Enable and strictly configure CORS in `main.ts` to allow only trusted origins.
 - [x] **Rate Limiting**:
-  - Implementar `@nestjs/throttler` proteger contra ataques de fuerza bruta y DDoS.
-- [ ] **Validación de Datos**:
-  - Asegurar que `class-validator` y `class-transformer` estén correctamente configurados globalmente (ya iniciado en `main.ts`, revisar cobertura).
+  - Implement `@nestjs/throttler` to protect against brute force and DDoS attacks.
+- [x] **Data Validation**:
+  - Ensure `class-validator` and `class-transformer` are correctly configured globally (configured in `main.ts` and decorated in DTOs).
 
-## 2. Manejo de Errores y Logging
+## 2. Error Handling and Logging
 
-- [x] **Filtros de Excepción Globales**:
-  - Crear un `AllExceptionsFilter` para estandarizar las respuestas de error (JSON estructurado).
-  - Mapear errores de Prisma (P2002, P2025) a códigos HTTP correctos (409 Conflict, 404 Not Found).
-- [x] **Manejo de 404**:
-  - Asegurar que `findById` y métodos similares lancen excepciones `NotFoundException` en lugar de devolver `null` o `200 OK` vacío.
+- [x] **Global Exception Filters**:
+  - Create an `AllExceptionsFilter` to standardize error responses (structured JSON).
+  - Map Prisma errors (P2002, P2025) to correct HTTP codes (409 Conflict, 404 Not Found).
+- [x] **404 Handling**:
+  - Ensure `findById` and similar methods throw `NotFoundException` instead of returning `null` or an empty `200 OK`.
 - [ ] **Logging**:
-  - Implementar un logger estructurado (ej. `winston` o `pino`) en lugar de `console.log`.
+  - Implement a structured logger (e.g., `winston` or `pino`) instead of `console.log`.
 
-## 3. Documentación
+## 3. Documentation
 
 - [x] **OpenAPI / Swagger**:
-  - Integrar `@nestjs/swagger`.
-  - Decorar los DTOs y Controladores con `@ApiProperty`, `@ApiOperation`, `@ApiResponse`.
-  - Habilitar la ruta `/api/docs`.
+  - Integrate `@nestjs/swagger`.
+  - Decorate DTOs and Controllers with `@ApiProperty`, `@ApiOperation`, `@ApiResponse`.
+  - Enable the `/api/docs` route.
 
 ## 4. Testing
 
-- [ ] **Unit Tests**:
-  - Crear pruebas unitarias para `AuthService`, `TodoService`, `UserService`.
-  - Mockear repositorios y dependencias externas.
-- [ ] **Integration Tests**:
-  - Expandir los tests e2e para cubrir flujos críticos (Registro -> Login -> Crear Todo -> Listar).
+- [x] **Unit Tests**:
+  - Create unit tests for `AuthService`, `TodoService`, `UserService` and their controllers.
+  - Mock repositories and external dependencies.
+- [x] **Integration Tests**:
+  - _Removed by user request to prioritize robust unit tests._
 
-## 5. DevOps y Configuración
+## 5. DevOps and Configuration
 
 - [x] **Docker**:
-  - Crear `Dockerfile` optimizado para producción (multi-stage build).
-  - Crear `docker-compose.yml` para levantar la API y la Base de Datos localmente.
-- [x] **Variables de Entorno**:
-  - Validar variables de entorno al inicio usando `joi` o `class-validator` (asegurar que DB_URL, JWT_SECRET, etc., existan).
-  - Crear `.env.example`.
-- [ ] **CI/CD (Futuro)**:
-  - Definir pipelines básicos (GitHub Actions) para correr linter y tests en cada PR.
+  - Create optimized `Dockerfile` for production (multi-stage build).
+  - Create `docker-compose.yml` to spin up the API and Database locally.
+- [x] **Environment Variables**:
+  - Validate environment variables at startup using `joi` or `class-validator` (ensure DB_URL, JWT_SECRET, etc., exist).
+  - Create `.env.example`.
+- [ ] **CI/CD (Future)**:
+  - Define basic pipelines (GitHub Actions) to run linter and tests on each PR.
 
-## 6. Calidad de Código y Refactorización
+## 6. Code Quality and Refactoring
 
-- [x] **Tipado Estricto**:
-  - Eliminar el uso de `any` (especialmente en `@Req() req: any`).
-  - Crear decorador `@User()` para extraer el usuario del request de forma segura.
-- [x] **Limpieza**:
-  - Corregir typos (ej. `singIn` -> `signIn`).
-  - Remover código muerto o comentado.
+- [x] **Strict Typing**:
+  - Eliminate the use of `any` (especially in `@Req() req: any`).
+  - Create `@User()` decorator to safely extract the user from the request.
+- [x] **Cleanup**:
+  - Correct typos (e.g., `singIn` -> `signIn`).
+  - Remove dead or commented-out code.
