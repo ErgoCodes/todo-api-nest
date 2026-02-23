@@ -1,7 +1,7 @@
 
 ### Login to get Token
 # @name login
-POST http://localhost:3001/auth/login
+POST http://localhost:3002/auth/login
 Content-Type: application/json
 
 {
@@ -13,12 +13,12 @@ Content-Type: application/json
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWxqdnR1OTAwMDAwYWw4a2ZldWl3Y3RwIiwidXNlcm5hbWUiOiJ0ZXN0ZXIxIiwiaWF0IjoxNzcwOTI2NDQ3LCJleHAiOjE3NzA5MjY1Njd9.XkgvYnCqTGzXEVs4t3069F5od3QR1qTmT8VwE9Qgd2c
 
 ### Get Todos (Success)
-GET http://localhost:3001/todos
+GET http://localhost:3002/todos
 Authorization: Bearer {{token}}
 
 ### Create Todo (Success)
 # @name createTodo
-POST http://localhost:3001/todos
+POST http://localhost:3002/todos
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -31,11 +31,11 @@ Authorization: Bearer {{token}}
 @todoId = {{createTodo.response.body.id}}
 
 ### Get Valid Todo
-GET http://localhost:3001/todos/{{todoId}}
+GET http://localhost:3002/todos/{{todoId}}
 Authorization: Bearer {{token}}
 
 ### Update Valid Todo
-PATCH http://localhost:3001/todos/{{todoId}}
+PATCH http://localhost:3002/todos/{{todoId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -44,15 +44,15 @@ Authorization: Bearer {{token}}
 }
 
 ### Delete Valid Todo
-DELETE http://localhost:3001/todos/{{todoId}}
+DELETE http://localhost:3002/todos/{{todoId}}
 Authorization: Bearer {{token}}
 
 ### Delete Non-Existent Todo (Should return 404 Not Found - Prisma P2025)
-DELETE http://localhost:3001/todos/non-existent-id
+DELETE http://localhost:3002/todos/non-existent-id
 Authorization: Bearer {{token}}
 
 ### Update Non-Existent Todo (Should return 404 Not Found - Prisma P2025)
-PATCH http://localhost:3001/todos/non-existent-id
+PATCH http://localhost:3002/todos/non-existent-id
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

@@ -7,9 +7,10 @@ A robust and scalable API built with NestJS, Prisma, and PostgreSQL, designed to
 - **JWT Authentication**: Register, login, and protected profile management.
 - **Security**: Hashing with `Argon2`, security headers with `Helmet`, CORS protection, and Throttling (Rate Limiting).
 - **Database**: PostgreSQL with Prisma ORM.
+- **Caching**: Redis with `ioredis` for high-performance caching.
 - **Strict Validation**: DTO validation with `class-validator` and configuration validation with `Joi`.
 - **Documentation**: Integrated interactive Swagger/OpenAPI.
-- **Dockerized**: Container support with Multi-stage builds.
+- **Dockerized**: Development-ready Docker Compose with hot reload.
 - **Testing**: Robust unit test coverage for Services and Controllers.
 
 ---
@@ -19,6 +20,7 @@ A robust and scalable API built with NestJS, Prisma, and PostgreSQL, designed to
 - [NestJS](https://nestjs.com/) (v11)
 - [Prisma ORM](https://www.prisma.io/)
 - [PostgreSQL](https://www.postgresql.org/)
+- [Redis](https://redis.io/)
 - [Docker](https://www.docker.com/)
 - [Jest](https://jestjs.io/)
 - [Swagger](https://swagger.io/)
@@ -29,7 +31,7 @@ A robust and scalable API built with NestJS, Prisma, and PostgreSQL, designed to
 
 - **Node.js**: v22 or higher.
 - **pnpm**: Recommended for package management.
-- **Docker & Docker Compose**: To quickly spin up the database environment.
+- **Docker & Docker Compose**: To quickly spin up the full environment.
 
 ---
 
@@ -45,58 +47,82 @@ pnpm install
 
 ### 2. Configure Environment
 
-Copy the example file and configure your `JWT_SECRET` and `DATABASE_URL`.
+Copy the example file and configure your variables.
 
 ```bash
 cp .env.example .env
 ```
 
-### 3. Spin up the Database
+| Variable       | Description                  | Default                  |
+| -------------- | ---------------------------- | ------------------------ |
+| `PORT`         | Application port             | `3000`                   |
+| `DATABASE_URL` | PostgreSQL connection string | Required                 |
+| `JWT_SECRET`   | JWT signing secret           | Required                 |
+| `REDIS_URL`    | Redis connection string      | `redis://localhost:6379` |
 
-If you have Docker installed, you can spin up a PostgreSQL instance ready to use:
+### 3. Run with Docker (Recommended)
+
+The easiest way — one command to start API + PostgreSQL + Redis with hot reload and run DB migrations:
 
 ```bash
-docker-compose up -d db
+make setup
 ```
 
-### 4. Initialize Prisma
+Or if you prefer manual control:
 
-Generate the client and run migrations to create tables:
+```bash
+docker compose up -d --build
+docker exec todo-api-nest-api-1 npx prisma db push
+```
+
+The API will be available at `http://localhost:3002`.
+
+### 4. Run Locally (Without Docker)
+
+If you prefer running without Docker, make sure PostgreSQL and Redis are available locally:
+
+```bash
+make dev
+```
+
+Or manually:
 
 ```bash
 pnpm exec prisma migrate dev
-```
-
-### 5. Run the Application
-
-```bash
-# Development mode with hot reload
 pnpm run start:dev
-
-# Production mode
-pnpm run build
-pnpm run start:prod
 ```
 
 ---
 
-## 🐳 Usage with Docker
+## 🔧 Make Commands
 
-If you prefer to run the entire stack (API + DB) in containers:
+Run `make help` to see all available commands. Here's a summary:
 
-```bash
-docker-compose up --build
-```
-
-The API will be available at `http://localhost:3000` (or the configured port).
+| Command            | Description                                       |
+| ------------------ | ------------------------------------------------- |
+| `make setup`       | First-time setup: start services + run migrations |
+| `make up`          | Start all services (API + DB + Redis)             |
+| `make down`        | Stop all services                                 |
+| `make restart`     | Restart all services                              |
+| `make clean`       | Stop services and remove volumes (fresh start)    |
+| `make logs`        | Follow API container logs                         |
+| `make logs-all`    | Follow all container logs                         |
+| `make db-push`     | Push Prisma schema to database                    |
+| `make db-migrate`  | Run Prisma migrations                             |
+| `make db-studio`   | Open Prisma Studio (database GUI)                 |
+| `make redis-cli`   | Open Redis CLI inside the container               |
+| `make redis-flush` | Flush all Redis cache                             |
+| `make test`        | Run unit tests                                    |
+| `make test-cov`    | Run tests with coverage report                    |
+| `make lint`        | Run linter                                        |
 
 ---
 
 ## 📖 API Documentation (Swagger)
 
-Once the application is running, you can access the interactive documentation at:
+Once the application is running, access the interactive documentation at:
 
-👉 [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+👉 [http://localhost:3002/api/docs](http://localhost:3002/api/docs)
 
 Here you can test all Authentication, User, and Todo endpoints.
 
@@ -107,18 +133,17 @@ Here you can test all Authentication, User, and Todo endpoints.
 We have prioritized robust unit tests that isolate business logic and controllers:
 
 ```bash
-# Run all unit tests
-pnpm run test
+make test
 
-# View test coverage
-pnpm run test:cov
+# Or with coverage
+make test-cov
 ```
 
 ---
 
 ## 🛣️ Roadmap
 
-Check the [ROADMAP.md](./ROADMAP.md) file to see project progress and pending tasks (Logging, CI/CD, etc.).
+Check the [ROADMAP.md](./ROADMAP.md) file to see project progress and pending tasks.
 
 ---
 

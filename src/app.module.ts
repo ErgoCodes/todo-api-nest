@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthController } from './modules/auth/auth.controller';
 import { PassportAuthController } from './modules/auth/passport-auth.controller';
 import { AuthService } from './modules/auth/auth.service';
+import { RedisModule } from './modules/redis/redis.module';
 
 import { envValidationSchema } from './lib/config/env.validation';
 
@@ -31,6 +32,7 @@ import { envValidationSchema } from './lib/config/env.validation';
     PrismaModule,
     TodoModule,
     AuthModule,
+    RedisModule,
   ],
   controllers: [AppController, AuthController, PassportAuthController],
   providers: [

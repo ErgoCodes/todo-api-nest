@@ -3,16 +3,18 @@ services:
   api:
     build: .
     ports:
-      - "${PORT:-3000}:3000"
+      - "3002:3000"
     environment:
       - PORT=3000
       - DATABASE_URL=postgres://postgres:postgres@db:5432/todo_db?schema=public
       - JWT_SECRET=${JWT_SECRET:-dev_secret_key}
+      - REDIS_URL=redis://redis:6379
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
       - db
+      - redis
     networks:
       - todo-network
 
@@ -29,8 +31,18 @@ services:
     networks:
       - todo-network
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - todo_redis_data:/data
+    networks:
+      - todo-network
+
 networks:
   todo-network:
 
 volumes:
   todo_postgres_data:
+  todo_redis_data:

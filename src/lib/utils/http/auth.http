@@ -1,6 +1,6 @@
 
 ### Register New User (Success)
-POST http://localhost:3001/auth/register
+POST http://localhost:3002/auth/register
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 
 ### Register Duplicate User (Should return 409 Conflict - Prisma P2002)
-POST http://localhost:3001/auth/register
+POST http://localhost:3002/auth/register
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Login Success
-POST http://localhost:3001/auth/login
+POST http://localhost:3002/auth/login
 Content-Type: application/json
 
 {
@@ -29,7 +29,7 @@ Content-Type: application/json
 }
 
 ### Login Invalid Credentials (Should return 401 Unauthorized)
-POST http://localhost:3001/auth/login
+POST http://localhost:3002/auth/login
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 
 ### Register Validation Error (Should return 400 Bad Request)
 # Password too short (< 8 chars)
-POST http://localhost:3001/auth/register
+POST http://localhost:3002/auth/register
 Content-Type: application/json
 
 {

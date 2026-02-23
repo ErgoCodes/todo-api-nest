@@ -44,10 +44,11 @@ This document describes the action plan to bring the `todo-api-nest` repository 
 ## 5. DevOps and Configuration
 
 - [x] **Docker**:
-  - Create optimized `Dockerfile` for production (multi-stage build).
-  - Create `docker-compose.yml` to spin up the API and Database locally.
+  - Create development `Dockerfile` with hot reload (`start:dev`).
+  - Create `docker-compose.yml` with API, PostgreSQL, and Redis services.
+  - Volume mounts for live code sync during development.
 - [x] **Environment Variables**:
-  - Validate environment variables at startup using `joi` or `class-validator` (ensure DB_URL, JWT_SECRET, etc., exist).
+  - Validate environment variables at startup using `joi` (PORT, DATABASE_URL, JWT_SECRET, REDIS_URL).
   - Create `.env.example`.
 - [ ] **CI/CD (Future)**:
   - Define basic pipelines (GitHub Actions) to run linter and tests on each PR.
@@ -60,3 +61,18 @@ This document describes the action plan to bring the `todo-api-nest` repository 
 - [x] **Cleanup**:
   - Correct typos (e.g., `singIn` -> `signIn`).
   - Remove dead or commented-out code.
+
+## 7. Caching (Redis)
+
+- [x] **Infrastructure**:
+  - Add Redis service to `docker-compose.yml` (Redis 7 Alpine).
+  - Configure `REDIS_URL` environment variable with Joi validation.
+- [x] **NestJS Integration**:
+  - Create global `RedisModule` with `ioredis` client.
+  - Export `REDIS_CLIENT` injection token for use across services.
+- [x] **Cache Implementation**:
+  - Add caching to high-frequency read endpoints (`GET /todos`, `GET /todos/:id`).
+  - Define TTL strategies per resource type (60s default).
+  - Implement cache invalidation on write operations (POST, PATCH, DELETE).
+- [ ] **Health Check** (Future):
+  - Add Redis connection status to a `/health` endpoint.
