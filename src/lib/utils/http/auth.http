@@ -1,0 +1,49 @@
+
+### Register New User (Success)
+POST http://localhost:3002/auth/register
+Content-Type: application/json
+
+{
+  "username": "tester1",
+  "email": "tester1@test.com",
+  "password": "password123"
+}
+
+### Register Duplicate User (Should return 409 Conflict - Prisma P2002)
+POST http://localhost:3002/auth/register
+Content-Type: application/json
+
+{
+  "username": "tester1",
+  "email": "tester1@test.com",
+  "password": "password123"
+}
+
+### Login Success
+POST http://localhost:3002/auth/login
+Content-Type: application/json
+
+{
+  "username": "tester1",
+  "password": "password123"
+}
+
+### Login Invalid Credentials (Should return 401 Unauthorized)
+POST http://localhost:3002/auth/login
+Content-Type: application/json
+
+{
+  "username": "tester1",
+  "password": "wrongpassword"
+}
+
+### Register Validation Error (Should return 400 Bad Request)
+# Password too short (< 8 chars)
+POST http://localhost:3002/auth/register
+Content-Type: application/json
+
+{
+  "username": "tester2",
+  "email": "tester2@test.com",
+  "password": "short"
+}
