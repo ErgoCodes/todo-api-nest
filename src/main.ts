@@ -6,8 +6,13 @@ import { AllExceptionsFilter } from './lib/filters/all-exceptions.filter';
 import { PrismaClientExceptionFilter } from './lib/filters/prisma-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { ResponseTimeInterceptor } from './lib/interceptors/response-time.interceptor';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Global Interceptors
+  app.useGlobalInterceptors(new ResponseTimeInterceptor());
   /*
    * SECURITY: Use Helmet to set secure HTTP headers.
    * This helps protect your app from some well-known web vulnerabilities by setting HTTP headers appropriately.
